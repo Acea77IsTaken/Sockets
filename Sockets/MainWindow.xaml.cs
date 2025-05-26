@@ -137,8 +137,6 @@ namespace Sockets
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
                 Player1HealthText.Text = $"{Player1Health.Value}/100";
                 MessageBox.Show("hola ahora se cambio la vida de player 1");
-                Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
-                Player2HealthText.Text = $"{Player2Health.Value}/100";
             }
             else
             {
@@ -146,8 +144,6 @@ namespace Sockets
                 Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
                 Player2HealthText.Text = $"{Player2Health.Value}/100";
                 MessageBox.Show("hola ahora se cambio la vida de player 2");
-                Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
-                Player1HealthText.Text = $"{Player1Health.Value}/100";
             }
         }
 
@@ -180,7 +176,20 @@ namespace Sockets
             // Enviamos nuestro ID junto con el ataque
             _client.SendAction("ATTACK", damage, _playerId);
 
-
+            if ((_playerId == 1))
+            {
+                // Dañar al jugador local
+                Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
+                Player1HealthText.Text = $"{Player1Health.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 1");
+            }
+            else
+            {
+                // Dañar al oponente (visualización local)
+                Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
+                Player2HealthText.Text = $"{Player2Health.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 2");
+            }
 
             // Mostramos el efecto visual localmente
             ShowBattleEffect("💥");
