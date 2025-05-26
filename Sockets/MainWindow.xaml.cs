@@ -34,7 +34,7 @@ namespace Sockets
             InitializeComponent();
             _client = new GameClient();
             _client.OnMessageReceived += HandleServerMessage;
-            _client.Connect("192.168.68.128", 1234); // Cambia por tu IP local
+            _client.Connect("10.26.10.211", 1234); // Cambia por tu IP local
             
         }
         private void ShowBattleEffect(string emoji)
@@ -85,12 +85,11 @@ namespace Sockets
                         break;
 
                     case "ATTACK":
-                        if (actorId != _playerId)
-                        {
+                        
                             DamagePlayer(value, isPlayer1: _playerId == 1);
                             AddToLog($"⚔️ Oponente te ataca por {value} de daño!");
                             ShowBattleEffect("💢");
-                        }
+                        
                         break;
 
                     case "DEFEND":
