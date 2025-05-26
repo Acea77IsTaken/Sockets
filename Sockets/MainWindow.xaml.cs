@@ -82,44 +82,47 @@ namespace Sockets
                 string[] parts = message.Split('|');
                 string action = parts[0];
                 int value = int.Parse(parts[1]);
-                int actorId = parts.Length > 2 ? int.Parse(parts[2]) : 0;
-
-                bool isMyAction = (actorId == _playerId);
 
                 switch (action)
                 {
                     case "CONNECT":
                         _playerId = value;
                         AddToLog($"Eres el Jugador {_playerId}");
-                        isMyTurn = (_playerId == 1); // El jugador 1 empieza
+                        isMyTurn = (_playerId == 1);
                         UpdateTurnUI();
+                        break;
+
+                    case "TURN":
+                        isMyTurn = (value == _playerId);
+                        UpdateTurnUI();
+                        if (isMyTurn) AddToLog("¡Es tu turno!");
                         break;
 
                     case "ATTACK":
-                        DamagePlayer(value, isPlayer1: actorId == 1);
-                        AddToLog($"⚔️ {(isMyAction ? "Tú" : "Oponente")} ataca y causa {value} de daño!");
-                        isMyTurn = !isMyAction;
-                        UpdateTurnUI();
+                        bool isOpponentAttack = (_playerId == 2);
+                        DamagePlayer(value, isPlayer1: !isOpponentAttack);
+                        AddToLog($"⚔️ {(isOpponentAttack ? "Oponente" : "Tú")} atacas y causas {value} de daño!");
+                        ShowBattleEffect(isOpponentAttack ? "💥" : "💢");
                         break;
 
                     case "DEFEND":
-                        AddToLog($"🛡️ {(isMyAction ? "Tú" : "Oponente")} se defiende!");
-                        isMyTurn = !isMyAction;
-                        UpdateTurnUI();
+                        bool isOpponentDefend = (_playerId == 2);
+                        AddToLog($"🛡️ {(isOpponentDefend ? "Oponente" : "Tú")} se defiende!");
+                        ShowBattleEffect("🛡️");
                         break;
 
                     case "MAGIC":
-                        DamagePlayer(value, isPlayer1: actorId == 1);
-                        AddToLog($"🔮 {(isMyAction ? "Tú" : "Oponente")} lanza un hechizo ({value} daño)!");
-                        isMyTurn = !isMyAction;
-                        UpdateTurnUI();
+                        bool isOpponentMagic = (_playerId == 2);
+                        DamagePlayer(value, isPlayer1: !isOpponentMagic);
+                        AddToLog($"🔮 {(isOpponentMagic ? "Oponente" : "Tú")} lanza un hechizo ({value} daño)!");
+                        ShowBattleEffect("✨");
                         break;
 
                     case "HEAL":
-                        HealPlayer(value, isPlayer1: actorId == 1);
-                        AddToLog($"🧪 {(isMyAction ? "Tú" : "Oponente")} usa una poción (+{value} vida)!");
-                        isMyTurn = !isMyAction;
-                        UpdateTurnUI();
+                        bool isOpponentHeal = (_playerId == 2);
+                        HealPlayer(value, isPlayer1: !isOpponentHeal);
+                        AddToLog($"🧪 {(isOpponentHeal ? "Oponente" : "Tú")} usa una poción (+{value} vida)!");
+                        ShowBattleEffect("🧪");
                         break;
                 }
             });
@@ -166,7 +169,15 @@ namespace Sockets
 
             int damage = random.Next(15, 30);
             _client.SendAction("ATTACK", damage);
+
+            // Actualización local inmediata
+            DamagePlayer(damage, isPlayer1: false); // Daño al oponente
+            AddToLog($"⚔️ Tú atacas y causas {damage} de daño!");
             ShowBattleEffect("💥");
+
+            // Cambio de turno local (el servidor confirmará)
+            isMyTurn = false;
+            UpdateTurnUI();
         }
 
         private void DefendBtn_Click(object sender, RoutedEventArgs e)
