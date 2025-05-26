@@ -176,7 +176,7 @@ namespace Sockets
             // Enviamos nuestro ID junto con el ataque
             _client.SendAction("ATTACK", damage, _playerId);
 
-            if ((_playerId == 1))
+            if ((_playerId == 2))
             {
                 // Dañar al jugador local
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
