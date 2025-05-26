@@ -67,6 +67,7 @@ namespace Sockets
                 string[] parts = message.Split('|');
                 string action = parts[0];
                 int value = int.Parse(parts[1]);
+                int actorId = parts.Length > 2 ? int.Parse(parts[2]) : 0;
 
                 switch (action)
                 {
@@ -84,12 +85,7 @@ namespace Sockets
                         break;
 
                     case "ATTACK":
-                        // El mensaje de ataque siempre viene del oponente
-                        bool attackComesFromOpponent = (_playerId == 2 && parts.Length > 2 && parts[2] == "1") ||
-                                                     (_playerId == 1 && parts.Length > 2 && parts[2] == "2");
-
-                        // Siempre dañamos a nuestro propio personaje (el oponente atacó)
-                        if (attackComesFromOpponent)
+                        if (actorId != _playerId)
                         {
                             DamagePlayer(value, isPlayer1: _playerId == 1);
                             AddToLog($"⚔️ Oponente te ataca por {value} de daño!");
@@ -98,23 +94,36 @@ namespace Sockets
                         break;
 
                     case "DEFEND":
-                        bool isOpponentDefend = (_playerId == 2);
-                        AddToLog($"🛡️ {(isOpponentDefend ? "Oponente" : "Tú")} se defiende!");
+                        AddToLog($"🛡️ {(actorId == _playerId ? "Tú" : "Oponente")} se defiende!");
                         ShowBattleEffect("🛡️");
                         break;
 
                     case "MAGIC":
-                        bool isOpponentMagic = (_playerId == 2);
-                        DamagePlayer(value, isPlayer1: !isOpponentMagic);
-                        AddToLog($"🔮 {(isOpponentMagic ? "Oponente" : "Tú")} lanza un hechizo ({value} daño)!");
-                        ShowBattleEffect("✨");
+                        if (actorId != _playerId)
+                        {
+                            DamagePlayer(value, isPlayer1: _playerId == 1);
+                            AddToLog($"🔮 Oponente lanza un hechizo ({value} daño)!");
+                            ShowBattleEffect("✨");
+                        }
+                        else
+                        {
+                            AddToLog("🔮 Usaste magia!");
+                        }
                         break;
 
                     case "HEAL":
-                        bool isOpponentHeal = (_playerId == 2);
-                        HealPlayer(value, isPlayer1: !isOpponentHeal);
-                        AddToLog($"🧪 {(isOpponentHeal ? "Oponente" : "Tú")} usa una poción (+{value} vida)!");
-                        ShowBattleEffect("🧪");
+                        if (actorId == _playerId)
+                        {
+                            HealPlayer(value, isPlayer1: _playerId == 1);
+                            AddToLog($"🧪 Usaste una poción (+{value} vida)!");
+                            ShowBattleEffect("🧪");
+                        }
+                        else
+                        {
+                            HealPlayer(value, isPlayer1: _playerId != 1);
+                            AddToLog($"🧪 Oponente usa una poción (+{value} vida)!");
+                            ShowBattleEffect("🧪");
+                        }
                         break;
                 }
             });
@@ -164,7 +173,8 @@ namespace Sockets
 
             int damage = random.Next(15, 30);
             // Enviamos nuestro ID junto con el ataque
-            _client.SendAction($"ATTACK",damage);
+            _client.SendAction("ATTACK", damage, _playerId);
+
 
             // Mostramos el efecto visual localmente
             ShowBattleEffect("💥");
@@ -179,7 +189,7 @@ namespace Sockets
         {
             if (!isMyTurn) return;
 
-            _client.SendAction("DEFEND", 0);
+            _client.SendAction("DEFEND", 0, _playerId);
             ShowBattleEffect("🛡️");
         }
 
@@ -188,7 +198,7 @@ namespace Sockets
             if (!isMyTurn || Player1Mana.Value < 20) return;
 
             int damage = random.Next(25, 40);
-            _client.SendAction("MAGIC", damage);
+            _client.SendAction("MAGIC", damage, _playerId);
             Player1Mana.Value -= 20;
             Player1ManaText.Text = $"{Player1Mana.Value}/100";
             ShowBattleEffect("✨");
@@ -199,7 +209,7 @@ namespace Sockets
             if (!isMyTurn) return;
 
             int healing = random.Next(20, 35);
-            _client.SendAction("HEAL", healing);
+            _client.SendAction("HEAL", healing, _playerId);
             ShowBattleEffect("🧪");
         }
     }

@@ -20,9 +20,9 @@ public class GameClient
         new Thread(() => ListenForMessages()).Start();
     }
 
-    public void SendAction(string action, int value)
+    public void SendAction(string action, int value, int playerId = 0)
     {
-        string message = $"{action}|{value}";
+        string message = playerId > 0 ? $"{action}|{value}|{playerId}" : $"{action}|{value}";
         byte[] buffer = Encoding.UTF8.GetBytes(message);
         _stream.Write(buffer, 0, buffer.Length);
     }
