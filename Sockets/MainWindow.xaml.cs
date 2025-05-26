@@ -136,7 +136,9 @@ namespace Sockets
                 // Dañar al jugador local
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
                 Player1HealthText.Text = $"{Player1Health.Value}/100";
-                MessageBox.Show("hola ahora se cambio la vida de player 2");
+                MessageBox.Show("hola ahora se cambio la vida de player 1");
+                Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
+                Player2HealthText.Text = $"{Player2Health.Value}/100";
             }
             else
             {
@@ -144,6 +146,8 @@ namespace Sockets
                 Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
                 Player2HealthText.Text = $"{Player2Health.Value}/100";
                 MessageBox.Show("hola ahora se cambio la vida de player 2");
+                Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
+                Player1HealthText.Text = $"{Player1Health.Value}/100";
             }
         }
 
