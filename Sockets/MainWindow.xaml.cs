@@ -34,7 +34,7 @@ namespace Sockets
             InitializeComponent();
             _client = new GameClient();
             _client.OnMessageReceived += HandleServerMessage;
-            _client.Connect("10.26.10.211", 1234); // Cambia por tu IP local
+            _client.Connect("10.26.10.166", 1234); // Cambia por tu IP local
             
         }
         private void ShowBattleEffect(string emoji)
@@ -86,9 +86,9 @@ namespace Sockets
 
                     case "ATTACK":
                         
-                            DamagePlayer(value, isPlayer1: _playerId == 1);
-                            AddToLog($"⚔️ Oponente te ataca por {value} de daño!");
-                            ShowBattleEffect("💢");
+                        DamagePlayer(value, isPlayer1: _playerId == 1);
+                        AddToLog($"⚔️ Oponente te ataca por {value} de daño!");
+                        ShowBattleEffect("💢");
                         
                         break;
 
@@ -131,7 +131,7 @@ namespace Sockets
         private void DamagePlayer(int damage, bool isPlayer1)
         {
             // Asegurarnos de que siempre dañamos al personaje correcto
-            if ((_playerId == 1 && isPlayer1) || (_playerId == 2 && !isPlayer1))
+            if ((_playerId == 1 && isPlayer1))
             {
                 // Dañar al jugador local
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
