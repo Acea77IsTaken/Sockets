@@ -82,6 +82,9 @@ namespace Sockets
                 string[] parts = message.Split('|');
                 string action = parts[0];
                 int value = int.Parse(parts[1]);
+                int actorId = parts.Length > 2 ? int.Parse(parts[2]) : 0;
+
+                bool isMyAction = (actorId == _playerId);
 
                 switch (action)
                 {
@@ -93,30 +96,30 @@ namespace Sockets
                         break;
 
                     case "ATTACK":
-                        bool isOpponentAttack = (_playerId == 2); // Si soy jugador 2, el ataque es del jugador 1
-                        DamagePlayer(value, isPlayer1: !isOpponentAttack); // Aplica daño al jugador correcto
-                        AddToLog($"⚔️ {(isOpponentAttack ? "Oponente" : "Tú")} atacas y causas {value} de daño!");
-                        ChangeTurn();
+                        DamagePlayer(value, isPlayer1: actorId == 1);
+                        AddToLog($"⚔️ {(isMyAction ? "Tú" : "Oponente")} ataca y causa {value} de daño!");
+                        isMyTurn = !isMyAction;
+                        UpdateTurnUI();
                         break;
 
                     case "DEFEND":
-                        bool isOpponentDefend = (_playerId == 2);
-                        AddToLog($"🛡️ {(isOpponentDefend ? "Oponente" : "Tú")} se defiende!");
-                        ChangeTurn();
+                        AddToLog($"🛡️ {(isMyAction ? "Tú" : "Oponente")} se defiende!");
+                        isMyTurn = !isMyAction;
+                        UpdateTurnUI();
                         break;
 
                     case "MAGIC":
-                        bool isOpponentMagic = (_playerId == 2);
-                        DamagePlayer(value, isPlayer1: !isOpponentMagic);
-                        AddToLog($"🔮 {(isOpponentMagic ? "Oponente" : "Tú")} lanza un hechizo ({value} daño)!");
-                        ChangeTurn();
+                        DamagePlayer(value, isPlayer1: actorId == 1);
+                        AddToLog($"🔮 {(isMyAction ? "Tú" : "Oponente")} lanza un hechizo ({value} daño)!");
+                        isMyTurn = !isMyAction;
+                        UpdateTurnUI();
                         break;
 
                     case "HEAL":
-                        bool isOpponentHeal = (_playerId == 2);
-                        HealPlayer(value, isPlayer1: !isOpponentHeal);
-                        AddToLog($"🧪 {(isOpponentHeal ? "Oponente" : "Tú")} usa una poción (+{value} vida)!");
-                        ChangeTurn();
+                        HealPlayer(value, isPlayer1: actorId == 1);
+                        AddToLog($"🧪 {(isMyAction ? "Tú" : "Oponente")} usa una poción (+{value} vida)!");
+                        isMyTurn = !isMyAction;
+                        UpdateTurnUI();
                         break;
                 }
             });
