@@ -60,21 +60,6 @@ namespace Sockets
             LogScroll.ScrollToEnd();
         }
 
-        private void ChangeTurn()
-        {
-            isMyTurn = !isMyTurn;
-            if (isMyTurn)
-            {
-                TurnText.Text = "🎯 TU TURNO";
-                TurnText.Foreground = new SolidColorBrush(Colors.LimeGreen);
-                
-            }
-            else
-            {
-                TurnText.Text = "⏳ ESPERANDO";
-                TurnText.Foreground = new SolidColorBrush(Colors.Orange);
-            }
-        }
         private void HandleServerMessage(string message)
         {
             Dispatcher.Invoke(() =>
@@ -99,10 +84,17 @@ namespace Sockets
                         break;
 
                     case "ATTACK":
-                        bool isOpponentAttack = (_playerId == 2);
-                        DamagePlayer(value, isPlayer1: !isOpponentAttack);
-                        AddToLog($"⚔️ {(isOpponentAttack ? "Oponente" : "Tú")} atacas y causas {value} de daño!");
-                        ShowBattleEffect(isOpponentAttack ? "💥" : "💢");
+                        // El mensaje de ataque siempre viene del oponente
+                        bool attackComesFromOpponent = (_playerId == 2 && parts.Length > 2 && parts[2] == "1") ||
+                                                     (_playerId == 1 && parts.Length > 2 && parts[2] == "2");
+
+                        // Siempre dañamos a nuestro propio personaje (el oponente atacó)
+                        if (attackComesFromOpponent)
+                        {
+                            DamagePlayer(value, isPlayer1: _playerId == 1);
+                            AddToLog($"⚔️ Oponente te ataca por {value} de daño!");
+                            ShowBattleEffect("💢");
+                        }
                         break;
 
                     case "DEFEND":
@@ -130,13 +122,16 @@ namespace Sockets
 
         private void DamagePlayer(int damage, bool isPlayer1)
         {
-            if (isPlayer1)
+            // Asegurarnos de que siempre dañamos al personaje correcto
+            if ((_playerId == 1 && isPlayer1) || (_playerId == 2 && !isPlayer1))
             {
+                // Dañar al jugador local
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
                 Player1HealthText.Text = $"{Player1Health.Value}/100";
             }
             else
             {
+                // Dañar al oponente (visualización local)
                 Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
                 Player2HealthText.Text = $"{Player2Health.Value}/100";
             }
@@ -168,14 +163,14 @@ namespace Sockets
             if (!isMyTurn) return;
 
             int damage = random.Next(15, 30);
-            _client.SendAction("ATTACK", damage);
+            // Enviamos nuestro ID junto con el ataque
+            _client.SendAction($"ATTACK",damage);
 
-            // Actualización local inmediata
-            DamagePlayer(damage, isPlayer1: false); // Daño al oponente
-            AddToLog($"⚔️ Tú atacas y causas {damage} de daño!");
+            // Mostramos el efecto visual localmente
             ShowBattleEffect("💥");
+            AddToLog($"⚔️ Atacas al oponente por {damage} de daño!");
 
-            // Cambio de turno local (el servidor confirmará)
+            // Cambiamos el turno localmente (el servidor confirmará)
             isMyTurn = false;
             UpdateTurnUI();
         }
