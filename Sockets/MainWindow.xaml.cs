@@ -215,7 +215,7 @@ namespace Sockets
 
             int damage = random.Next(25, 40);
             _client.SendAction("MAGIC", damage, _playerId);
-            Player1Mana.Value -= 20;
+            
             Player1ManaText.Text = $"{Player1Mana.Value}/100";
             ShowBattleEffect("✨");
 
@@ -224,6 +224,7 @@ namespace Sockets
                 // Dañar al jugador local
                 Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
                 Player1ManaText.Text = $"{Player1Mana.Value}/100";
+                Player1Mana.Value -= Math.Max(0,Player1Mana.Value-20);
                 MessageBox.Show("hola ahora se cambio la vida de player 1");
             }
             else
@@ -231,6 +232,7 @@ namespace Sockets
                 // Dañar al oponente (visualización local)
                 Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
                 Player2ManaText.Text = $"{Player2Mana.Value}/100";
+                Player2Mana.Value -= Math.Max(0, Player1Mana.Value - 20);
                 MessageBox.Show("hola ahora se cambio la vida de player 2");
             }
         }
@@ -243,7 +245,7 @@ namespace Sockets
             _client.SendAction("HEAL", healing, _playerId);
             ShowBattleEffect("🧪");
 
-            if ((_playerId == 2))
+            if ((_playerId == 1))
             {
                 // Dañar al jugador local
                 Player1Health.Value = Math.Min(100, Player1Health.Value + healing);
