@@ -13,6 +13,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Sockets
 {
@@ -217,6 +218,21 @@ namespace Sockets
             Player1Mana.Value -= 20;
             Player1ManaText.Text = $"{Player1Mana.Value}/100";
             ShowBattleEffect("✨");
+
+            if ((_playerId == 2))
+            {
+                // Dañar al jugador local
+                Player1Health.Value = Math.Max(0, Player1Health.Value - damage);
+                Player1ManaText.Text = $"{Player1Mana.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 1");
+            }
+            else
+            {
+                // Dañar al oponente (visualización local)
+                Player2Health.Value = Math.Max(0, Player2Health.Value - damage);
+                Player2ManaText.Text = $"{Player2Mana.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 2");
+            }
         }
 
         private void ItemBtn_Click(object sender, RoutedEventArgs e)
@@ -226,6 +242,21 @@ namespace Sockets
             int healing = random.Next(20, 35);
             _client.SendAction("HEAL", healing, _playerId);
             ShowBattleEffect("🧪");
+
+            if ((_playerId == 2))
+            {
+                // Dañar al jugador local
+                Player1Health.Value = Math.Min(100, Player1Health.Value + healing);
+                Player1HealthText.Text = $"{Player1Health.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 1");
+            }
+            else
+            {
+                // Dañar al oponente (visualización local)
+                Player2Health.Value = Math.Min(100, Player2Health.Value + healing);
+                Player2HealthText.Text = $"{Player2Health.Value}/100";
+                MessageBox.Show("hola ahora se cambio la vida de player 2");
+            }
         }
     }
 }
